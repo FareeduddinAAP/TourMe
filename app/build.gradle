@@ -36,4 +36,21 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation platform('com.google.firebase:firebase-bom:26.5.0')
+    implementation 'com.google.firebase:firebase-analytics'
+
+    implementation 'com.google.firebase:firebase-auth:20.0.2'
+    implementation 'com.google.firebase:firebase-database:19.6.0'
+    implementation 'com.google.firebase:firebase-core:18.0.2'
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+
+    implementation 'com.google.firebase:firebase-storage:19.2.1'
+    implementation 'com.androidmapsextensions:android-maps-extensions:2.4.0'
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    implementation 'com.google.maps.android:android-maps-utils:2.0.0'
+    implementation 'com.github.jd-alexander:library:1.1.0'
+
 }
+apply plugin: 'com.google.gms.google-services'

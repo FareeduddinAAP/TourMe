@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "721623695752",
+    "firebase_url": "https://tourme-1ae10-default-rtdb.firebaseio.com",
+    "project_id": "tourme-1ae10",
+    "storage_bucket": "tourme-1ae10.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721623695752:android:55b333a70883018f1c7a3d",
+        "android_client_info": {
+          "package_name": "com.project.tourme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "721623695752-llpt1gil73fchm94jfh3qu6dp6r9s6t1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.project.tourme",
+            "certificate_hash": "955c6671ae4de4509cf212aeb749123053a37176"
+          }
+        },
+        {
+          "client_id": "721623695752-pb575jhmscuv4m9rlr19muc1st2uoa19.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHDhM6Lpag870UUkpWylU8tJOb5n15u-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "721623695752-pb575jhmscuv4m9rlr19muc1st2uoa19.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
