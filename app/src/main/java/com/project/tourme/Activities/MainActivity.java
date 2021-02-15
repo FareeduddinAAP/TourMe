@@ -1,8 +1,10 @@
-package com.project.tourme;
+package com.project.tourme.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.project.tourme.R;
 
 public class MainActivity extends AppCompatActivity {
 
