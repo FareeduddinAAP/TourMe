@@ -4,9 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.Manifest;
 import android.app.Activity;
@@ -15,8 +16,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -25,14 +24,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -66,6 +63,7 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -79,10 +77,13 @@ import com.project.tourme.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener, LocationListener {
+import de.hdodenhof.circleimageview.CircleImageView;
+
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        com.google.android.gms.location.LocationListener, LocationListener, NavigationView.OnNavigationItemSelectedListener {
     GoogleMap mGoogleMap;
     SupportMapFragment mapFrag;
     LocationRequest mLocationRequest;
@@ -111,6 +112,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     List<AutocompletePrediction> perdictionList;
     LocationCallback locationCallback;
 
+    DrawerLayout drawerLayout;
+    NavigationView navigationView;
+    CircleImageView profileImage;
+    TextView username;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +132,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         dialog = new Dialog(this);
 
 
+        navigationView = findViewById(R.id.navigationView);
+        drawerLayout = findViewById(R.id.drawer_layout);
+
+        View view = navigationView.inflateHeaderView(R.layout.drawer_layout);
+        username = view.findViewById(R.id.username);
+        profileImage = view.findViewById(R.id.setup_profile_image1);
+
+
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
@@ -135,21 +149,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         placesClient = Places.createClient(MainActivity.this);
         AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
+
+
         searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
             @Override
             public void onSearchStateChanged(boolean enabled) {
 
             }
-
             @Override
             public void onSearchConfirmed(CharSequence text) {
-
                 startSearch(text.toString(), true, null, true);
             }
 
             @Override
             public void onButtonClicked(int buttonCode) {
 
+                if (buttonCode == MaterialSearchBar.BUTTON_NAVIGATION) {
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
                 if (buttonCode == MaterialSearchBar.BUTTON_BACK) {
                     searchBar.closeSearch();
                 }
@@ -188,7 +205,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 if (!searchBar.isSuggestionsVisible()) {
                                     searchBar.showSuggestionsList();
                                 }
-
                             }
 
                         } else {
@@ -196,7 +212,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     }
                 });
-
             }
 
             @Override
@@ -208,15 +223,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         addLocationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (latLngCurrentLocation!=null)
-                {
-                    Intent intent=new Intent(MainActivity.this,AddLocationActivity.class);
-                    intent.putExtra("latitude",latLngCurrentLocation.latitude);
-                    intent.putExtra("longitude",latLngCurrentLocation.longitude);
+                if (latLngCurrentLocation != null) {
+                    Intent intent = new Intent(MainActivity.this, AddLocationActivity.class);
+                    intent.putExtra("latitude", latLngCurrentLocation.latitude);
+                    intent.putExtra("longitude", latLngCurrentLocation.longitude);
                     startActivity(intent);
                 }
             }
         });
+        navigationView.setNavigationItemSelectedListener(this);
 
         searchBar.setSuggestionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
             @Override
@@ -301,7 +316,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
     }
-
 
 
     @Override
@@ -401,8 +415,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return false;
                 }
             });
-
-
         }
 
 
@@ -557,6 +569,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId()==R.id.logout)
+        {
+            mAuth.signOut();
+            Intent intent=new Intent(MainActivity.this,LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        }else  if (item.getItemId()==R.id.myMemory)
+        {
+            mAuth.signOut();
+            Intent intent=new Intent(MainActivity.this,MemoryActivity.class);
+            startActivity(intent);
+        }
+        return false;
     }
 }
 

@@ -58,7 +58,7 @@ public class SetupActivity extends AppCompatActivity {
 
 
         //Varibale Init
-        profileImageView = findViewById(R.id.setup_profile_image);
+        profileImageView = findViewById(R.id.setup_profile_image1);
         inputUsername = findViewById(R.id.inputUsername);
         inputAdress = findViewById(R.id.inputCountry);
         inputPhone = findViewById(R.id.inputPhone);

@@ -2,27 +2,29 @@ package com.project.tourme.Activities;
 
 public class mLocation {
 
-    private String userID;
+    private String key;
     private double latitude;
     private double longitude;
     private String markerName;
+    private String imageUrl;
 
-    public mLocation(String userID, double latitude, double longitude, String markerName) {
-        this.userID = userID;
+    public mLocation(String key, double latitude, double longitude, String markerName, String imageUrl) {
+        this.key = key;
         this.latitude = latitude;
         this.longitude = longitude;
         this.markerName = markerName;
+        this.imageUrl = imageUrl;
     }
 
     public mLocation() {
     }
 
-    public String getUserID() {
-        return userID;
+    public String getKey() {
+        return key;
     }
 
-    public void setUserID(String userID) {
-        this.userID = userID;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public double getLatitude() {
@@ -47,6 +49,14 @@ public class mLocation {
 
     public void setMarkerName(String markerName) {
         this.markerName = markerName;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
 
