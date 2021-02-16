@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 if (latLngCurrentLocation!=null)
                 {
-                    Intent intent=new Intent(MainActivity.this,MemoryActivity.class);
+                    Intent intent=new Intent(MainActivity.this,AddLocationActivity.class);
                     intent.putExtra("latitude",latLngCurrentLocation.latitude);
                     intent.putExtra("longitude",latLngCurrentLocation.longitude);
                     startActivity(intent);

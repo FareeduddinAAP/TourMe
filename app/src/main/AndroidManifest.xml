@@ -17,7 +17,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TourMe">
-        <activity android:name=".Activities.MemoryActivity"></activity>
+        <activity android:name=".Activities.AddLocationActivity"></activity>
+        <activity android:name=".Activities.MemoryActivity" />
         <activity android:name=".Activities.SetupActivity" />
         <activity android:name=".Activities.RegisterActivity" />
         <activity android:name=".Activities.LoginActivity" />
