@@ -8,8 +8,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -47,6 +49,7 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
 
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1012;
     private static final int IMAGE_PICKER_SELECT = 201;
+    private static final int MY_GALLERY_REQ = 2011;
     SupportMapFragment mapFrag;
     LatLng latLng;
     EditText inputLocationName;
@@ -56,7 +59,6 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
     CardView myPicCard;
     Uri imageUri;
     ProgressDialog progressDialog;
-
 
     StorageReference mStorageRef;
     DatabaseReference mRef;
@@ -106,6 +108,29 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
 
     private void TakePicure() {
 
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("Select Camera/Gallery");
+        dialog.setPositiveButton("Camera", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                openCamera();
+            }
+        }).setNegativeButton("Gallery", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), MY_GALLERY_REQ);
+            }
+        });
+        dialog.show();
+
+
+    }
+
+    private void openCamera() {
+
         //Android device need permission from user ,can app use camera sensor or not
         if (ContextCompat.checkSelfPermission(AddLocationActivity.this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -128,8 +153,6 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
             intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             startActivityForResult(intent, IMAGE_PICKER_SELECT);
         }
-
-
     }
 
     private void SaveLocationInfo() {
@@ -165,9 +188,7 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
                                             Intent intent = new Intent(AddLocationActivity.this, MainActivity.class);
                                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                             startActivity(intent);
-                                        }
-                                        else
-                                        {
+                                        } else {
                                             progressDialog.dismiss();
                                         }
                                     }
@@ -195,6 +216,13 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MY_GALLERY_REQ & data != null) {
+            imageUri = data.getData();
+            myPic.setImageURI(imageUri);
+            if (imageUri != null) {
+                myPicCard.setVisibility(View.VISIBLE);
+            }
+        }
 
         if (requestCode == IMAGE_PICKER_SELECT) {
             try {
@@ -233,7 +261,6 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                         startActivityForResult(intent, IMAGE_PICKER_SELECT);
                     }
-
                 } else {
 
                     // permission denied, boo! Disable the

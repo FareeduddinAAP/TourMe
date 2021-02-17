@@ -54,6 +54,19 @@
             app:layout_constraintTop_toBottomOf="@+id/searchBar"
             app:layout_constraintVertical_bias="0.867"
             app:srcCompat="@drawable/ic_me_add" />
+
+        <TextView
+            android:id="@+id/distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Distance:0.0"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@color/purple_500"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView

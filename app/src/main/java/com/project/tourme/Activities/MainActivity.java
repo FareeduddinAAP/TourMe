@@ -49,6 +49,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -71,8 +73,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.SphericalUtil;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
+import com.project.tourme.Activities.directionhelpers.FetchURL;
+import com.project.tourme.Activities.directionhelpers.TaskLoadedCallback;
 import com.project.tourme.R;
 import com.squareup.picasso.Picasso;
 
@@ -84,7 +89,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        com.google.android.gms.location.LocationListener, LocationListener, NavigationView.OnNavigationItemSelectedListener {
+        com.google.android.gms.location.LocationListener,
+        LocationListener, NavigationView.OnNavigationItemSelectedListener, TaskLoadedCallback {
+
+
+    private Polyline currentPolyline;
     GoogleMap mGoogleMap;
     SupportMapFragment mapFrag;
     LocationRequest mLocationRequest;
@@ -94,13 +103,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     View mapView;
     LocationManager locationManager;
     public static final int GPS = 101;
+    TextView distanceTV;
 
     //current location lat,long stored varibale
-    LatLng latLngCurrentLocation;
+    LatLng latLngCurrentLocation, latLngTargetLocation;
 
     FirebaseAuth mAuth;
     FirebaseUser mUser;
-    DatabaseReference mRef,mUserRef;
+    DatabaseReference mRef, mUserRef;
 
     ImageView addLocationBtn;
     MaterialSearchBar searchBar;
@@ -119,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     TextView username;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         addLocationBtn = findViewById(R.id.addLocationBtn);
         searchBar = findViewById(R.id.searchBar);
+        distanceTV = findViewById(R.id.distance);
         dialog = new Dialog(this);
 
 
@@ -148,13 +158,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFrag.getMapAsync(this);
         mapView = mapFrag.getView();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
-        Places.initialize(MainActivity.this, "AIzaSyCnYy9lLbQBwB0Dimqa0uNNhp61qL7CyaY");
+        Places.initialize(MainActivity.this, "AIzaSyCNnHkvG0SaHA1weH76Q4lz3Kk4-_Gs3QA");
         placesClient = Places.createClient(MainActivity.this);
         AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
         LoadMyProfile();
-
-
 
 
         searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
@@ -192,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     searchBar.clearSuggestions();
                 }
                 FindAutocompletePredictionsRequest perdictionRequest = FindAutocompletePredictionsRequest.builder()
-                        .setCountry("pk").setTypeFilter(TypeFilter.ADDRESS)
+                        .setCountry("sg").setTypeFilter(TypeFilter.ADDRESS)
                         .setSessionToken(token)
                         .setQuery(charSequence.toString())
                         .build();
@@ -269,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             Place place = fetchPlaceResponse.getPlace();
                             LatLng latLng = place.getLatLng();
                             if (latLng != null) {
-                                mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+                                mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
                             }
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -294,8 +302,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mUserRef.child(mUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists())
-                {
+                if (snapshot.exists()) {
                     username.setText(snapshot.child("username").getValue().toString());
                     Picasso.get().load(snapshot.child("profileImageUrl").getValue().toString()).into(profileImage);
                 }
@@ -446,6 +453,48 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
 
+
+        //set click listner to select target location
+        mGoogleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                latLngTargetLocation=latLng;
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+                alertDialog.setTitle("Do you want to draw Route b/w Current Location and Target Location");
+                alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (latLngCurrentLocation!=null && latLngTargetLocation!=null)
+                        {
+                            new FetchURL(MainActivity.this).execute(getUrl(latLngCurrentLocation, latLngTargetLocation), "driving");
+                            //Distance calculation
+                            double distance = SphericalUtil.computeDistanceBetween(latLngCurrentLocation, latLngTargetLocation);
+//                            distance.setVisibility(View.VISIBLE);
+                            if (distance>1000)
+                            {
+                                distanceTV.setText("Distance: " + (int) distance/1000 + "KM");
+                            }else
+                            {
+                                distanceTV.setText("Distance: " + (int) distance + "M");
+                            }
+
+
+
+                        }
+
+                    }
+                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                });
+                alertDialog.show();
+
+
+            }
+        });
+
+
         //Set Click event listner on Marker images
         mGoogleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
@@ -476,6 +525,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addApi(LocationServices.API)
                 .build();
         mGoogleApiClient.connect();
+    }
+
+    private String getUrl(LatLng origin, LatLng dest) {
+        // Origin of route
+        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
+        // Destination of route
+        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
+        // Mode
+        String mode = "mode=" + "walking";
+        // Building the parameters to the web service
+        String parameters = str_origin + "&" + str_dest + "&" + mode;
+        // Output format
+        String output = "json";
+        // Building the url to the web service
+        return "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=" + "AIzaSyCNnHkvG0SaHA1weH76Q4lz3Kk4-_Gs3QA";
     }
 
     @Override
@@ -600,6 +664,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    //draw line on map
+    @Override
+    public void onTaskDone(Object... values) {
+        if (currentPolyline != null)
+            currentPolyline.remove();
+        currentPolyline = mGoogleMap.addPolyline((PolylineOptions) values[0]);
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.logout) {
@@ -609,12 +681,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             startActivity(intent);
             finish();
         } else if (item.getItemId() == R.id.myMemory) {
-            mAuth.signOut();
             Intent intent = new Intent(MainActivity.this, MemoryActivity.class);
             startActivity(intent);
         }
         return false;
     }
+
+
 }
 
 
