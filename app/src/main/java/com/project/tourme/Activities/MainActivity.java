@@ -74,6 +74,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 import com.project.tourme.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     FirebaseAuth mAuth;
     FirebaseUser mUser;
-    DatabaseReference mRef;
+    DatabaseReference mRef,mUserRef;
 
     ImageView addLocationBtn;
     MaterialSearchBar searchBar;
@@ -118,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     TextView username;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,7 +127,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
-        mRef = FirebaseDatabase.getInstance().getReference().child("Locations");
+        mRef = FirebaseDatabase.getInstance().getReference().child("Location");
+        mUserRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
         addLocationBtn = findViewById(R.id.addLocationBtn);
         searchBar = findViewById(R.id.searchBar);
@@ -149,6 +152,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         placesClient = Places.createClient(MainActivity.this);
         AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
+        LoadMyProfile();
+
+
 
 
         searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
@@ -156,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onSearchStateChanged(boolean enabled) {
 
             }
+
             @Override
             public void onSearchConfirmed(CharSequence text) {
                 startSearch(text.toString(), true, null, true);
@@ -283,6 +290,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    private void LoadMyProfile() {
+        mUserRef.child(mUser.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists())
+                {
+                    username.setText(snapshot.child("username").getValue().toString());
+                    Picasso.get().load(snapshot.child("profileImageUrl").getValue().toString()).into(profileImage);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (imm != null) {
@@ -308,6 +335,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     marker.setTag(postSnapshot.getRef().getKey());
                     marker.showInfoWindow();
                 }
+
             }
 
             @Override
@@ -424,8 +452,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public boolean onMarkerClick(Marker marker) {
                 LatLng position = (marker.getPosition());
 //                myTargetLatlong=position;
-
-                Toast.makeText(MainActivity.this, "" + marker.getTag().toString(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, ViewActivity.class);
+                intent.putExtra("key", marker.getTag().toString());
+                startActivity(intent);
 
 //                if (myCurrentLatlong != null && myTargetLatlong != null) {
 //                    new FetchURL(MainActivity.this).execute(getUrl(myCurrentLatlong, myTargetLatlong), "driving");
@@ -573,17 +602,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId()==R.id.logout)
-        {
+        if (item.getItemId() == R.id.logout) {
             mAuth.signOut();
-            Intent intent=new Intent(MainActivity.this,LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
-        }else  if (item.getItemId()==R.id.myMemory)
-        {
+        } else if (item.getItemId() == R.id.myMemory) {
             mAuth.signOut();
-            Intent intent=new Intent(MainActivity.this,MemoryActivity.class);
+            Intent intent = new Intent(MainActivity.this, MemoryActivity.class);
             startActivity(intent);
         }
         return false;

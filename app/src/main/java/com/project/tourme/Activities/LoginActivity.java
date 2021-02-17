@@ -50,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
         inputPassword = findViewById(R.id.inputPassword);
         btnLogin = findViewById(R.id.btnLogin);
 
+        progressBar=new ProgressDialog(this);
         createNewAccount = findViewById(R.id.createNewAccount);
 
 
