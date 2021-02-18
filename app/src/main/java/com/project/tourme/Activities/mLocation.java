@@ -2,6 +2,8 @@ package com.project.tourme.Activities;
 
 public class mLocation {
 
+
+    //location mode class
     private String key;
     private double latitude;
     private double longitude;

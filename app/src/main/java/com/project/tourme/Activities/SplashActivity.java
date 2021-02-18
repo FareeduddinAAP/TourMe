@@ -24,10 +24,9 @@ import com.project.tourme.R;
 
 public class SplashActivity extends AppCompatActivity {
 
+    //Variable dec
     ImageView imageView;
     TextView textView;
-
-    //Variable Init
     FirebaseAuth mAuth;
     FirebaseUser mUser;
     DatabaseReference mUserRef;
@@ -37,10 +36,12 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        //hide status bar
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        //init variable
         imageView=findViewById(R.id.logo);
         textView=findViewById(R.id.textLogo);
-
         Animation animationlogo;
         Animation animationText;
 
@@ -58,7 +59,7 @@ public class SplashActivity extends AppCompatActivity {
 
             if (mUser!=null)
             {
-                CHeckUserData();
+                CheckUserData();
             }else
             {
                 //open new activity
@@ -71,7 +72,7 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(runnable, 5000);
     }
     //check Edither  user saved setup data or not
-    private void CHeckUserData() {
+    private void CheckUserData() {
         mUserRef.child(mUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -94,7 +95,6 @@ public class SplashActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
                 Toast.makeText(SplashActivity.this, ""+error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

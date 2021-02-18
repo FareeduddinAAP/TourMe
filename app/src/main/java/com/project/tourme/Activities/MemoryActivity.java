@@ -2,6 +2,7 @@ package com.project.tourme.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,6 +24,7 @@ import java.util.List;
 
 public class MemoryActivity extends AppCompatActivity {
 
+    //dec varibale
     RecyclerView recyclerView;
     StorageReference mStorageRef;
     DatabaseReference mRef;
@@ -30,20 +32,29 @@ public class MemoryActivity extends AppCompatActivity {
     FirebaseUser mUser;
     List<mLocation> list;
     RecyclerviewAdaper adaper;
+    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memory);
+
+        //init varibale
         recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+
+        toolbar=findViewById(R.id.appbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("My Locations");
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
         mStorageRef = FirebaseStorage.getInstance().getReference().child("MemoryImages");
         mRef = FirebaseDatabase.getInstance().getReference("Location");
 
+
+        //load all image and data that saved in database
         mRef.child(mUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

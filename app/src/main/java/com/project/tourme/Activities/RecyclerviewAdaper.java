@@ -14,6 +14,7 @@ import java.util.List;
 
 public class RecyclerviewAdaper extends RecyclerView.Adapter<MyViewHolder> {
 
+    //recyclerview adapter
     List<mLocation>list;
     Context context;
 

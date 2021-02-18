@@ -47,6 +47,7 @@ import java.util.HashMap;
 
 public class AddLocationActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    //varibale creating
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1012;
     private static final int IMAGE_PICKER_SELECT = 201;
     private static final int MY_GALLERY_REQ = 2011;
@@ -59,7 +60,6 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
     CardView myPicCard;
     Uri imageUri;
     ProgressDialog progressDialog;
-
     StorageReference mStorageRef;
     DatabaseReference mRef;
     FirebaseAuth mAuth;
@@ -71,6 +71,8 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_location);
 
+
+        //init varibale
         inputLocationName = findViewById(R.id.inputLocationName);
         takePic = findViewById(R.id.takePic);
         btnSave = findViewById(R.id.btnSave);
@@ -86,11 +88,14 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
         mRef = FirebaseDatabase.getInstance().getReference("Location");
 
 
+
+        //init google mpa
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
         latLng = new LatLng(getIntent().getDoubleExtra("latitude", 0.0), getIntent().getDoubleExtra("longitude", 0.0));
 
 
+        //set click litnser Save button
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -108,16 +113,21 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
 
     private void TakePicure() {
 
+        //create dialog to choose camera or gallery
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setTitle("Select Camera/Gallery");
         dialog.setPositiveButton("Camera", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+
+                //if click open button that open camera method call
                 openCamera();
             }
         }).setNegativeButton("Gallery", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+
+                //when click on gallery to open gallery
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -155,6 +165,8 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
         }
     }
 
+
+    //when click on save info it will save lcoation in database with images
     private void SaveLocationInfo() {
         String markerName = inputLocationName.getText().toString();
         if (markerName.isEmpty()) {
@@ -165,6 +177,9 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
         } else {
             progressDialog.show();
             String key = mRef.push().getKey();
+
+
+            //store image in Storage database
             mStorageRef.child(mUser.getUid()).child(key).putFile(imageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
@@ -173,12 +188,15 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
                             @Override
                             public void onSuccess(Uri uri) {
 
+
                                 HashMap hashMap = new HashMap();
                                 hashMap.put("imageUrl", uri.toString());
                                 hashMap.put("key", key);
                                 hashMap.put("markerName", markerName);
                                 hashMap.put("latitude", latLng.latitude);
                                 hashMap.put("longitude", latLng.longitude);
+
+                                //store data and link of image stored database
                                 mRef.child(mUser.getUid()).child(key).updateChildren(hashMap).addOnCompleteListener(new OnCompleteListener() {
                                     @Override
                                     public void onComplete(@NonNull Task task) {
@@ -203,6 +221,7 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
         }
     }
 
+    //call method when map ready
     @Override
     public void onMapReady(GoogleMap googleMap) {
         MarkerOptions markerOptions = new MarkerOptions();
@@ -217,6 +236,8 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MY_GALLERY_REQ & data != null) {
+
+            //create URi of image when image select from gallery
             imageUri = data.getData();
             myPic.setImageURI(imageUri);
             if (imageUri != null) {
@@ -224,6 +245,8 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
             }
         }
 
+
+        //select uri when take pic from camera
         if (requestCode == IMAGE_PICKER_SELECT) {
             try {
                 if (imageUri != null) {
@@ -238,6 +261,8 @@ public class AddLocationActivity extends AppCompatActivity implements OnMapReady
     }
 
 
+
+    //check camera permission
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

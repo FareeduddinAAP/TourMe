@@ -32,7 +32,6 @@ public class RegisterActivity extends AppCompatActivity {
     Button btnRegister;
     TextView alreadyHaveAccount;
     ProgressDialog progressBar;
-
     FirebaseAuth mAuth;
     FirebaseUser mUser;
     DatabaseReference mUserRef;
@@ -51,9 +50,9 @@ public class RegisterActivity extends AppCompatActivity {
         inputPassword = findViewById(R.id.inputPassword);
         inputConfrimPassword = findViewById(R.id.inputPassword2);
         btnRegister = findViewById(R.id.btnRegister);
-
         alreadyHaveAccount = findViewById(R.id.alreadyHaveAccount);
         mAuth = FirebaseAuth.getInstance();
+        mUser=mAuth.getCurrentUser();
         mUserRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
 
@@ -61,6 +60,7 @@ public class RegisterActivity extends AppCompatActivity {
         alreadyHaveAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //open new activity
                 Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
@@ -73,10 +73,14 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                //get data from input that user typed
                 String email = inputEmail.getText().toString();
                 String password = inputPassword.getText().toString();
                 String confrimPassword = inputConfrimPassword.getText().toString();
 
+
+                //show errors if user did'nt anything in input field
                 if (email.isEmpty() || !email.contains("@")) {
                     inputEmail.setError("Enter Correct format Email");
                     inputEmail.requestFocus();
@@ -89,6 +93,8 @@ public class RegisterActivity extends AppCompatActivity {
                     progressBar.setMessage("Registration...");
                     progressBar.setCanceledOnTouchOutside(false);
                     progressBar.show();
+
+                    //register user using email and password using firebase
                     mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {

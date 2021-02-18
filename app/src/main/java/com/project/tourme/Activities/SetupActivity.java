@@ -115,7 +115,7 @@ public class SetupActivity extends AppCompatActivity {
     }
 
 
-    //check Edither user allowsed permission or not
+    //check Either user allowed permission or not
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -139,6 +139,7 @@ public class SetupActivity extends AppCompatActivity {
         final String phone=inputPhone.getText().toString();
 
 
+        //show error if user did not typed anything in input field
         if (username.isEmpty() || username.length()<3)
         {
             inputUsername.setError("Select Correct Username with min 4 letter");

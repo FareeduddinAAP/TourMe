@@ -10,6 +10,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.project.tourme.R;
 
 public class MyViewHolder extends RecyclerView.ViewHolder {
+
+    //recyclerview Holder class
+
     TextView markerName;
     ImageView profileImage;
 
